@@ -29,7 +29,7 @@ export interface FeedbackData {
   }[];
 }
 
-export const generateQuestion = async (apiKey: string, model: string): Promise<QuestionData> => {
+export const generateQuestion = async (apiKey: string, model: string, seed: number = 0): Promise<QuestionData> => {
   const prompt = `You are a professional TOEFL Essentials exam question creator. Your task is to generate a "Complete the Words" practice exercise.
 
   Please follow these rules:
@@ -55,13 +55,20 @@ export const generateQuestion = async (apiKey: string, model: string): Promise<Q
   `;
 
   try {
+    const requestPayload: any = {
+      model: model,
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+      temperature: 0.9,
+    };
+
+    if (seed > 0) {
+      requestPayload.seed = seed;
+    }
+
     const response = await axios.post(
       API_URL,
-      {
-        model: model,
-        messages: [{ role: 'user', content: prompt }],
-        response_format: { type: 'json_object' },
-      },
+      requestPayload,
       {
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -77,7 +84,7 @@ export const generateQuestion = async (apiKey: string, model: string): Promise<Q
   }
 };
 
-export const gradeAnswers = async (apiKey: string, model: string, questionData: QuestionData, userAnswers: Record<number, string>): Promise<FeedbackData> => {
+export const gradeAnswers = async (apiKey: string, model: string, questionData: QuestionData, userAnswers: Record<number, string>, seed: number = 0): Promise<FeedbackData> => {
     // Construct the user's attempt for the grader
     const attempt = questionData.segments.map((seg, index) => {
         if (seg.type === 'text') return seg.content;
@@ -113,13 +120,20 @@ export const gradeAnswers = async (apiKey: string, model: string, questionData: 
     }`;
 
     try {
+        const requestPayload: any = {
+          model: model,
+          messages: [{ role: 'user', content: prompt }],
+          response_format: { type: 'json_object' },
+          temperature: 0.9,
+        };
+
+        if (seed > 0) {
+          requestPayload.seed = seed;
+        }
+
         const response = await axios.post(
           API_URL,
-          {
-            model: model,
-            messages: [{ role: 'user', content: prompt }],
-            response_format: { type: 'json_object' },
-          },
+          requestPayload,
           {
             headers: {
               'Authorization': `Bearer ${apiKey}`,

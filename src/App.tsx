@@ -7,7 +7,8 @@ import { Loader2 } from 'lucide-react';
 
 function App() {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('siliconflow_api_key') || '');
-  const [model, setModel] = useState('deepseek-ai/DeepSeek-V3');
+  const [model, setModel] = useState('deepseek-ai/DeepSeek-V3.2');
+  const [seed, setSeed] = useState(0);
   
   useEffect(() => {
     localStorage.setItem('siliconflow_api_key', apiKey);
@@ -33,7 +34,7 @@ function App() {
     setUserAnswers({});
     
     try {
-      const data = await generateQuestion(apiKey, model);
+      const data = await generateQuestion(apiKey, model, seed);
       setQuestion(data);
     } catch (err: unknown) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,7 +51,7 @@ function App() {
     setError(null);
     
     try {
-      const data = await gradeAnswers(apiKey, model, question, userAnswers);
+      const data = await gradeAnswers(apiKey, model, question, userAnswers, seed);
       setFeedback(data);
     } catch (err: unknown) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -73,11 +74,13 @@ function App() {
           <p className="text-gray-600">Complete the Sentence - AI Powered</p>
         </header>
 
-        <ConfigPanel 
-          apiKey={apiKey} 
-          setApiKey={setApiKey} 
-          model={model} 
-          setModel={setModel} 
+        <ConfigPanel
+          apiKey={apiKey}
+          setApiKey={setApiKey}
+          model={model}
+          setModel={setModel}
+          seed={seed}
+          setSeed={setSeed}
         />
 
         {error && (
